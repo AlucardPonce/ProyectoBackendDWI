@@ -1,1 +1,18 @@
-Esta es la base de datos
+CREATE DATABASE IF NOT EXISTS idgs09;
+USE idgs09;
+
+CREATE TABLE Division (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    clave VARCHAR(45),
+    nombre VARCHAR(45),
+    activo VARCHAR(45)
+);
+
+CREATE TABLE programas_educativos (
+    id_pe INT NOT NULL PRIMARY KEY,
+    clave VARCHAR(230),
+    programa_educativo VARCHAR(230),
+    activo INT,
+    id_division INT,
+    FOREIGN KEY (id_division) REFERENCES Division(id)
+);
