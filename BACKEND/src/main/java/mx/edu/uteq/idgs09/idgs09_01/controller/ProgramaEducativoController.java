@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/pe")
 public class ProgramaEducativoController {
@@ -27,5 +29,67 @@ public class ProgramaEducativoController {
     private ProgramaEducativoRepo repo;
     @Autowired
     private DivisionRepo drepo;
+
+    @PostMapping()
+public ResponseEntity<?> crear(@RequestBody ProgramaEducativo p) {
+    try {
+        if (p.getDivision() == null || p.getDivision().getId() == 0) {
+            return ResponseEntity.badRequest().body("Se requiere una división válida");
+        }
+
+        Optional<Division> divisionOpt = drepo.findById(p.getDivision().getId());
+        if (divisionOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("División no encontrada con ID: " + p.getDivision().getId());
+        }
+
+        p.setDivision(divisionOpt.get());
+        ProgramaEducativo guardado = repo.save(p);
+        return ResponseEntity.ok(guardado);
+    } catch (Exception e) {
+        e.printStackTrace(); // Importante para ver el error completo en consola
+        return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
+    }
+}
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> editar(@PathVariable int id, @RequestBody ProgramaEducativo entity) {
+        Optional<ProgramaEducativo> opt = repo.findById(id);
+        if (opt.isPresent()) {
+            ProgramaEducativo p = opt.get();
+            p.setProgramaEducativo(entity.getProgramaEducativo());
+            p.setClave(entity.getClave());
+            p.setActivo(entity.isActivo());
+            p.setDivision(entity.getDivision());
+            return ResponseEntity.ok(repo.save(p));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable int id) {
+        Optional<ProgramaEducativo> opt = repo.findById(id);
+        if (opt.isPresent()) {
+            repo.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping()
+    public List<ProgramaEducativo> buscarTodos(
+            @RequestParam(required = false, defaultValue = "false") boolean soloActivos) {
+        if (soloActivos) {
+            return repo.findAll().stream().filter(ProgramaEducativo::isActivo).toList();
+        }
+        return repo.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarPorId(@PathVariable int id) {
+        return repo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 }

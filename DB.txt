@@ -1,18 +1,31 @@
-CREATE DATABASE IF NOT EXISTS idgs09;
+DROP DATABASE IF EXISTS idgs09;
+CREATE DATABASE idgs09;
 USE idgs09;
 
 CREATE TABLE Division (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     clave VARCHAR(45),
     nombre VARCHAR(45),
-    activo VARCHAR(45)
+    activo BOOLEAN
 );
 
-CREATE TABLE programas_educativos (
-    id_pe INT NOT NULL PRIMARY KEY,
+CREATE TABLE programa_educativo (
+    id_pe INT NOT NULL PRIMARY KEY AUTO_INCREMENT, -- <- Aquí está la corrección
     clave VARCHAR(230),
     programa_educativo VARCHAR(230),
     activo INT,
     id_division INT,
     FOREIGN KEY (id_division) REFERENCES Division(id)
 );
+
+-- Insertar divisiones
+INSERT INTO Division (clave, nombre, activo) VALUES 
+('DIV01', 'Ingeniería en Software', TRUE),
+('DIV02', 'Ingeniería en Mecatrónica', TRUE),
+('DIV03', 'Ciencias Básicas', FALSE);
+
+-- Insertar programas educativos (sin especificar id_pe porque ahora es AUTO_INCREMENT)
+INSERT INTO programa_educativo (clave, programa_educativo, activo, id_division) VALUES
+('ISW101', 'Licenciatura en Ingeniería en Software', 1, 1),
+('MEC102', 'Licenciatura en Ingeniería Mecatrónica', 1, 2),
+('CB103', 'Programa de Matemáticas Aplicadas', 0, 3);
