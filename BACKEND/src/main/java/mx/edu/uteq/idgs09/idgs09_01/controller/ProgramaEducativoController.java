@@ -31,10 +31,26 @@ public class ProgramaEducativoController {
     private DivisionRepo drepo;
 
     @PostMapping()
-    public ResponseEntity<ProgramaEducativo> crear(@RequestBody ProgramaEducativo p) {
-        ProgramaEducativo entity = repo.save(p);
-        return ResponseEntity.ok(entity);
+public ResponseEntity<?> crear(@RequestBody ProgramaEducativo p) {
+    try {
+        if (p.getDivision() == null || p.getDivision().getId() == 0) {
+            return ResponseEntity.badRequest().body("Se requiere una división válida");
+        }
+
+        Optional<Division> divisionOpt = drepo.findById(p.getDivision().getId());
+        if (divisionOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("División no encontrada con ID: " + p.getDivision().getId());
+        }
+
+        p.setDivision(divisionOpt.get());
+        ProgramaEducativo guardado = repo.save(p);
+        return ResponseEntity.ok(guardado);
+    } catch (Exception e) {
+        e.printStackTrace(); // Importante para ver el error completo en consola
+        return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
     }
+}
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable int id, @RequestBody ProgramaEducativo entity) {
@@ -61,8 +77,9 @@ public class ProgramaEducativoController {
     }
 
     @GetMapping()
-    public List<ProgramaEducativo> buscarTodos(@RequestParam(required = false, defaultValue = "false") boolean soloActivos){
-        if(soloActivos){
+    public List<ProgramaEducativo> buscarTodos(
+            @RequestParam(required = false, defaultValue = "false") boolean soloActivos) {
+        if (soloActivos) {
             return repo.findAll().stream().filter(ProgramaEducativo::isActivo).toList();
         }
         return repo.findAll();

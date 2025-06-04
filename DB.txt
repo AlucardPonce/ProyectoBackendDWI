@@ -10,7 +10,7 @@ CREATE TABLE Division (
 );
 
 CREATE TABLE programa_educativo (
-    id_pe INT NOT NULL PRIMARY KEY,
+    id_pe INT NOT NULL PRIMARY KEY AUTO_INCREMENT, -- <- Aquí está la corrección
     clave VARCHAR(230),
     programa_educativo VARCHAR(230),
     activo INT,
@@ -24,8 +24,8 @@ INSERT INTO Division (clave, nombre, activo) VALUES
 ('DIV02', 'Ingeniería en Mecatrónica', TRUE),
 ('DIV03', 'Ciencias Básicas', FALSE);
 
--- Insertar programas educativos
-INSERT INTO programa_educativo (id_pe, clave, programa_educativo, activo, id_division) VALUES
-(101, 'ISW101', 'Licenciatura en Ingeniería en Software', 1, 1),
-(102, 'MEC102', 'Licenciatura en Ingeniería Mecatrónica', 1, 2),
-(103, 'CB103', 'Programa de Matemáticas Aplicadas', 0, 3);
+-- Insertar programas educativos (sin especificar id_pe porque ahora es AUTO_INCREMENT)
+INSERT INTO programa_educativo (clave, programa_educativo, activo, id_division) VALUES
+('ISW101', 'Licenciatura en Ingeniería en Software', 1, 1),
+('MEC102', 'Licenciatura en Ingeniería Mecatrónica', 1, 2),
+('CB103', 'Programa de Matemáticas Aplicadas', 0, 3);
