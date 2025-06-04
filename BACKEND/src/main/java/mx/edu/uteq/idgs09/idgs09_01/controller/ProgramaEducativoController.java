@@ -28,4 +28,49 @@ public class ProgramaEducativoController {
     @Autowired
     private DivisionRepo drepo;
 
+    @PostMapping()
+    public ResponseEntity<ProgramaEducativo> crear(@RequestBody ProgramaEducativo p) {
+        ProgramaEducativo entity = repo.save(p);
+        return ResponseEntity.ok(entity);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> editar(@PathVariable int id, @RequestBody ProgramaEducativo entity) {
+        Optional<ProgramaEducativo> opt = repo.findById(id);
+        if (opt.isPresent()) {
+            ProgramaEducativo p = opt.get();
+            p.setProgramaEducativo(entity.getProgramaEducativo());
+            p.setClave(entity.getClave());
+            p.setActivo(entity.isActivo());
+            p.setDivision(entity.getDivision());
+            return ResponseEntity.ok(repo.save(p));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable int id) {
+        Optional<ProgramaEducativo> opt = repo.findById(id);
+        if (opt.isPresent()) {
+            repo.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping()
+    public List<ProgramaEducativo> buscarTodos(@RequestParam(required = false, defaultValue = "false") boolean soloActivos){
+        if(soloActivos){
+            return repo.findAll().stream().filter(ProgramaEducativo::isActivo).toList();
+        }
+        return repo.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarPorId(@PathVariable int id) {
+        return repo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }
