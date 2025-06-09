@@ -18,6 +18,50 @@ CREATE TABLE programa_educativo (
     FOREIGN KEY (id_division) REFERENCES Division(id)
 );
 
+
+CREATE TABLE Usuario (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    rol ENUM('ALUMNO', 'MAESTRO', 'ADMIN') NOT NULL,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE Cubiculo (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    ubicacion VARCHAR(100) NOT NULL,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE Turno (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    folio VARCHAR(20) UNIQUE NOT NULL,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_asignado DATETIME NOT NULL,
+    estado ENUM('PENDIENTE', 'ACEPTADO', 'RECHAZADO', 'CANCELADO', 'COMPLETADO') NOT NULL DEFAULT 'PENDIENTE',
+    motivo TEXT,
+    id_alumno INT NOT NULL,
+    id_maestro INT NOT NULL,
+    id_cubiculo INT,
+    FOREIGN KEY (id_alumno) REFERENCES Usuario(id),
+    FOREIGN KEY (id_maestro) REFERENCES Usuario(id),
+    FOREIGN KEY (id_cubiculo) REFERENCES Cubiculo(id)
+);
+
+CREATE TABLE Notificacion (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    mensaje TEXT NOT NULL,
+    fecha_envio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    leida BOOLEAN DEFAULT FALSE,
+    id_usuario INT NOT NULL,
+    id_turno INT,
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id),
+    FOREIGN KEY (id_turno) REFERENCES Turno(id)
+);
+
 -- Insertar divisiones
 INSERT INTO Division (clave, nombre, activo) VALUES 
 ('DIV01', 'Ingeniería en Software', TRUE),
