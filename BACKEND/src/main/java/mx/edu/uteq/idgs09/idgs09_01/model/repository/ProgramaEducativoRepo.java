@@ -4,4 +4,5 @@ import mx.edu.uteq.idgs09.idgs09_01.model.entity.ProgramaEducativo;
 
 
 public interface ProgramaEducativoRepo extends JpaRepository<ProgramaEducativo,Integer>{
+    boolean existsByClave(String clave);
 }
