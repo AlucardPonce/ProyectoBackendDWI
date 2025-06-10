@@ -92,4 +92,15 @@ public ResponseEntity<?> crear(@RequestBody ProgramaEducativo p) {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/clave/{clave}")
+    public ResponseEntity<?> existePorClave(@PathVariable String clave) {
+        boolean existe = repo.existsByClave(clave);
+        if (existe) {
+            return ResponseEntity.ok().build(); // Devuelve 200 OK sin cuerpo
+        } else {
+            return ResponseEntity.notFound().build(); // Devuelve 404 Not Found
+        }
+    }
+
+
 }
