@@ -1,4 +1,3 @@
-
 package mx.edu.uteq.idgs09.idgs09_01.controller;
 
 import org.apache.catalina.connector.Request;
@@ -7,6 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import mx.edu.uteq.idgs09.idgs09_01.services.DivisionService;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,56 +23,47 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-
-
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/division")
 public class DivisionController {
     @Autowired
-    private DivisionRepo repo;
+    private DivisionService serv;
 
-        @PostMapping()
+    @PostMapping()
     public ResponseEntity<Division> crear(@RequestBody Division d) {
-        Division entity = repo.save(d);
-        return ResponseEntity.ok(entity);
+        Division entity = serv.crear(d);
+        if (entity != null) {
+            return ResponseEntity.ok(entity);
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@PathVariable int id, @RequestBody Division entity) {
-        Optional<Division> opt = repo.findById(id);
+        Optional<Division> opt = serv.editar(id, entity);
         if (opt.isPresent()) {
-            Division d = opt.get();
-            d.setNombre(entity.getNombre());
-            d.setClave(entity.getClave());
-            d.setActivo(entity.isActivo());
-            return ResponseEntity.ok(repo.save(d));
+            return ResponseEntity.ok(opt.get());
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable int id) {
-        Optional<Division> opt = repo.findById(id);
-        if (opt.isPresent()) {
-            repo.deleteById(id);
+        if (serv.borrar(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping()
-    public List<Division> buscarTodos(@RequestParam boolean soloActivos){
-        if(soloActivos){
-            return repo.findAll().stream().filter(Division::isActivo).toList();
-        }
-        return repo.findAll();
+    public List<Division> buscarTodos(@RequestParam boolean soloActivos) {
+        return serv.buscar(soloActivos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable int id) {
-        return repo.findById(id)
+        return serv.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
 

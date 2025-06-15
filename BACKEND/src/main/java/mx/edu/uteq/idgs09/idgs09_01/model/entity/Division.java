@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
+import mx.edu.uteq.idgs09.idgs09_01.model.entity.Profesor;
 
 @Entity
 @Data

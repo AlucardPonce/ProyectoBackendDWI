@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import mx.edu.uteq.idgs09.idgs09_01.model.entity.ProgramaEducativoProfesor;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,87 +24,89 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import mx.edu.uteq.idgs09.idgs09_01.services.ProgramaEducativoService;
+import org.springframework.http.HttpStatus;
+import mx.edu.uteq.idgs09.idgs09_01.model.entity.Profesor;
+import org.springframework.cloud.openfeign.FeignClient;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/pe")
 public class ProgramaEducativoController {
     @Autowired
-    private ProgramaEducativoRepo repo;
-    @Autowired
     private DivisionRepo drepo;
+    @Autowired
+    private ProgramaEducativoService serv;
 
-    @PostMapping()
-public ResponseEntity<?> crear(@RequestBody ProgramaEducativo p) {
-    try {
-        if (p.getDivision() == null || p.getDivision().getId() == 0) {
-            return ResponseEntity.badRequest().body("Se requiere una división válida");
+    @GetMapping
+    public List<ProgramaEducativo> buscarTodos(@RequestParam boolean soloActivos) {
+        if (soloActivos) {
+            return serv.findAll().stream().filter(ProgramaEducativo::isActivo).toList();
         }
-
-        Optional<Division> divisionOpt = drepo.findById(p.getDivision().getId());
-        if (divisionOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("División no encontrada con ID: " + p.getDivision().getId());
-        }
-
-        p.setDivision(divisionOpt.get());
-        ProgramaEducativo guardado = repo.save(p);
-        return ResponseEntity.ok(guardado);
-    } catch (Exception e) {
-        e.printStackTrace(); // Importante para ver el error completo en consola
-        return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
+        return serv.findAll();
     }
-}
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarPorId(@PathVariable int id) {
+        return serv.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<?> crear(@RequestParam int idDivision, @RequestBody ProgramaEducativo pe) {
+        Optional<Division> opt = drepo.findById(idDivision);
+        if (opt.isPresent()) {
+            Division d = opt.get();
+            pe.setDivision(d);
+            return ResponseEntity.ok(serv.save(pe));
+        }
+        return ResponseEntity.notFound().build();
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> editar(@PathVariable int id, @RequestBody ProgramaEducativo entity) {
-        Optional<ProgramaEducativo> opt = repo.findById(id);
+    public ResponseEntity<?> editar(@PathVariable int id, @RequestBody ProgramaEducativo pe) {
+        Optional<ProgramaEducativo> opt = serv.findById(id);
         if (opt.isPresent()) {
             ProgramaEducativo p = opt.get();
-            p.setProgramaEducativo(entity.getProgramaEducativo());
-            p.setClave(entity.getClave());
-            p.setActivo(entity.isActivo());
-            p.setDivision(entity.getDivision());
-            return ResponseEntity.ok(repo.save(p));
+            Optional<Division> divOpt = drepo.findById(pe.getDivision().getId());
+            if (divOpt.isPresent()) {
+                p.setClave(pe.getClave());
+                p.setProgramaEducativo(pe.getProgramaEducativo());
+                p.setActivo(pe.isActivo());
+                p.setDivision(divOpt.get());
+                return ResponseEntity.ok(serv.save(p));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Division no encontrada");
+            }
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable int id) {
-        Optional<ProgramaEducativo> opt = repo.findById(id);
+    public ResponseEntity<?> borrar(@PathVariable int id) {
+        Optional<ProgramaEducativo> opt = serv.findById(id);
         if (opt.isPresent()) {
-            repo.deleteById(id);
-            return ResponseEntity.ok().build();
+            serv.deleteById(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping()
-    public List<ProgramaEducativo> buscarTodos(
-            @RequestParam(required = false, defaultValue = "false") boolean soloActivos) {
-        if (soloActivos) {
-            return repo.findAll().stream().filter(ProgramaEducativo::isActivo).toList();
+    @PutMapping("/asignar-profesor/{peId}")
+    public ResponseEntity<?> asignarProfesor(@PathVariable Long peId, @RequestBody Profesor profesor) {
+        Optional<Profesor> opt;
+        try {
+            opt = serv.asignarProfesor(profesor, peId);
+        } catch (FeignException e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("mensaje", 
+            "No existe el profesor por el id o error en la comunicación" + e.getMessage() ));
         }
-        return repo.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable int id) {
-        return repo.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/clave/{clave}")
-    public ResponseEntity<?> existePorClave(@PathVariable String clave) {
-        boolean existe = repo.existsByClave(clave);
-        if (existe) {
-            return ResponseEntity.ok().build(); // Devuelve 200 OK sin cuerpo
-        } else {
-            return ResponseEntity.notFound().build(); // Devuelve 404 Not Found
+        if (opt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(opt.get());
         }
-    }
-
+        return ResponseEntity.notFound().build();
+}
 
 }
