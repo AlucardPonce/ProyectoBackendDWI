@@ -34,6 +34,17 @@ public class ProgramaEducativoService {
 
     @Transactional
     public ProgramaEducativo save(ProgramaEducativo pe) {
+        if (pe.getIdPro() != null) {
+            try {
+                // Llama al microservicio de profesores para validar que existe
+                Profesor profesor = client.porId(pe.getIdPro());
+                if (profesor == null) {
+                    throw new IllegalArgumentException("El profesor no existe en el microservicio externo.");
+                }
+            } catch (Exception e) {
+                throw new IllegalArgumentException("El profesor no existe o el microservicio no responde.");
+            }
+        }
         return repo.save(pe);
     }
 
