@@ -1,29 +1,26 @@
 package mx.edu.uteq.idgs09.idgs09_01.model.entity;
 
-import lombok.Data;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-
-import java.lang.annotation.Inherited;
-
-import javax.annotation.processing.Generated;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@entity
+@Entity
+@Table(name = "programa_educativo")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProgramaEducativoProfesor {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "profesor_id")
+    @Column(name = "profesor_id", nullable = false)
     private int profesorId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_pe")
+    private ProgramaEducativo programaEducativo;
 }
+

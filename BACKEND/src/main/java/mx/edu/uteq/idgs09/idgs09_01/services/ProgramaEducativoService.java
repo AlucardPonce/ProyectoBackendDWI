@@ -4,18 +4,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import main.java.mx.edu.uteq.idgs09.idgs09_01.model.entity.ProgramaEducativoProfesor;
 import mx.edu.uteq.idgs09.idgs09_01.model.entity.ProgramaEducativo;
+import mx.edu.uteq.idgs09.idgs09_01.model.entity.Profesor;
+import mx.edu.uteq.idgs09.idgs09_01.model.entity.ProgramaEducativoProfesor;
+import mx.edu.uteq.idgs09.idgs09_01.model.repository.ProgramaEducativoRepo;
+import mx.edu.uteq.idgs09.idgs09_01.clients.ProfesorClientRest;
 
 import java.util.List;
 import java.util.Optional;
 
-import mx.edu.uteq.idgs09.idgs09_01.model.repository.ProgramaEducativoRepo;
-
 @Service
 public class ProgramaEducativoService {
+
     @Autowired
     private ProgramaEducativoRepo repo;
+
+    @Autowired
+    private ProfesorClientRest client;
 
     @Transactional(readOnly = true)
     public List<ProgramaEducativo> findAll() {
@@ -38,23 +43,33 @@ public class ProgramaEducativoService {
     }
 
     @Transactional
-    public Optional<Profesor> asignarProfesor(Profesor p, Long peId) {
+    public Optional<Profesor> asignarProfesor(Profesor p, int peId) {
         Optional<ProgramaEducativo> opt = repo.findById(peId);
         if (opt.isPresent()) {
             ProgramaEducativo pe = opt.get();
 
+            // Verifica que el profesor exista en el microservicio externo
             Profesor profesorMsvc = client.porId(p.getId());
-            profesorMsvc.setClavePe(pe.getClave());
-            client.editarProfesor(p.getId(), profesorMsvc);
-
-            ProgramaEducativoProfesor progEduProf = new ProgramaEducativoProfesor();
-            progEduProf.setProfesorId(profesorMsvc.getId());
-
-            pe.addProgramaEducativoProfesor(progEduProf);
-            repo.save(pe);
-            return Optional.of(profesorMsvc);
+            if (profesorMsvc != null) {
+                // Asigna el id del profesor al programa educativo
+                pe.setIdPro(profesorMsvc.getId());
+                repo.save(pe);
+                return Optional.of(profesorMsvc);
+            }
         }
         return Optional.empty();
     }
 
+    @Transactional
+    public Profesor editarProfesor(int id, Profesor p) {
+        // Llama al microservicio de profesor para editar
+        return client.editarProfesor(id, p);
+    }
+
+    public Profesor obtenerProfesorDePrograma(ProgramaEducativo pe) {
+        if (pe.getIdPro() != null) {
+            return client.porId(pe.getIdPro());
+        }
+        return null;
+    }
 }

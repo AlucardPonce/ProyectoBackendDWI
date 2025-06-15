@@ -1,13 +1,23 @@
 package mx.edu.uteq.idgs09.idgs09_01.clients;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import mx.edu.uteq.idgs09.idgs09_01.model.entity.Profesor;
+import mx.edu.uteq.idgs09.idgs09_01.model.entity.ProgramaEducativo;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "idgs09-02", url = "localhost:8081")
+@FeignClient(name = "profesor-service", url = "http://localhost:8081")
 public interface ProfesorClientRest {
 
+    @GetMapping("/api/profesores/{id}")
+    Profesor porId(@PathVariable("id") int id);
+
+    @PutMapping("/api/profesores/{id}")
+    Profesor editarProfesor(@PathVariable("id") int id, @RequestBody Profesor profesor);
+
+    default Profesor obtenerProfesorDePrograma(ProgramaEducativo pe) {
+        if (pe.getIdPro() != null) {
+            return porId(pe.getIdPro());
+        }
+        return null;
+    }
 }
