@@ -65,6 +65,12 @@ public class ProgramaEducativoService {
                 // Asigna el id del profesor al programa educativo
                 pe.setIdPro(profesorMsvc.getId());
                 repo.save(pe);
+
+                // --- Sincroniza el campo id_pe en el microservicio de profesores ---
+                // Usa la clave del programa educativo
+                profesorMsvc.setId_pe(pe.getClave());
+                client.editarProfesor(profesorMsvc.getId(), profesorMsvc);
+
                 return Optional.of(profesorMsvc);
             }
         }
@@ -85,7 +91,7 @@ public class ProgramaEducativoService {
     }
 
     @Transactional(readOnly = true)
-    public ProgramaEducativo BuscarPorClave(String clave){
+    public ProgramaEducativo BuscarPorClave(String clave) {
         return repo.findByClave(clave);
     }
 }

@@ -8,6 +8,6 @@ public class Profesor {
     private String nombre;
     private String apellidos;
     private String genero;
-    private String clavePe; // campo que se actualizará al asignar PE
+    private String id_pe;
     private boolean activo;
 }
