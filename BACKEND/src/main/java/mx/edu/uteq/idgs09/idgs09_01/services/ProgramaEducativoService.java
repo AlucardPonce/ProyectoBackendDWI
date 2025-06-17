@@ -83,4 +83,9 @@ public class ProgramaEducativoService {
         }
         return null;
     }
+
+    @Transactional(readOnly = true)
+    public ProgramaEducativo BuscarPorClave(String clave){
+        return repo.findByClave(clave);
+    }
 }

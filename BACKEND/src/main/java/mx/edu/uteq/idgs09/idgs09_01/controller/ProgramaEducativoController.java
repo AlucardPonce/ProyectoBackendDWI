@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 import mx.edu.uteq.idgs09.idgs09_01.model.entity.Profesor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -107,4 +110,10 @@ public class ProgramaEducativoController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/clave/{clave}")
+    public ProgramaEducativo getPorClave(@PathVariable String clave) {
+        return serv.BuscarPorClave(clave);
+    }
+    
 }
