@@ -18,9 +18,6 @@ CREATE TABLE programa_educativo (
     FOREIGN KEY (id_division) REFERENCES Division(id)
 );
 
-ALTER TABLE programa_educativo
-ADD COLUMN id_pro INT;
-
 -- Insertar divisiones
 INSERT INTO Division (clave, nombre, activo) VALUES 
 ('DIV01', 'Ingeniería en Software', TRUE),
@@ -32,6 +29,13 @@ INSERT INTO programa_educativo (clave, programa_educativo, activo, id_division) 
 ('ISW101', 'Licenciatura en Ingeniería en Software', 1, 1),
 ('MEC102', 'Licenciatura en Ingeniería Mecatrónica', 1, 2),
 ('CB103', 'Programa de Matemáticas Aplicadas', 0, 3);
+
+CREATE TABLE programa_educativo_profesor(
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    id_pe int,
+    id_pro int,
+     FOREIGN KEY (id_pe) REFERENCES programa_educativo(id_pe) 
+);
 
 DROP DATABASE IF EXISTS idgs09_profesor;
 CREATE DATABASE IF NOT EXISTS idgs09_profesor;
