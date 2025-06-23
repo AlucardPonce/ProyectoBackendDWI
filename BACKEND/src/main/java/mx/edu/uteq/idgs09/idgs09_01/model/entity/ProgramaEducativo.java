@@ -24,7 +24,4 @@ public class ProgramaEducativo {
     @JoinColumn(name = "id_division")
     @JsonIgnoreProperties(value = {"programasEducativos"})
     private Division division;
-
-    @Column(name = "id_pro")
-    private Integer idPro; // Solo el ID del profesor externo
 }

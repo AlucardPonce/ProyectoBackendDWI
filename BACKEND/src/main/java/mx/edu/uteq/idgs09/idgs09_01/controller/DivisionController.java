@@ -1,6 +1,5 @@
 package mx.edu.uteq.idgs09.idgs09_01.controller;
 
-import org.apache.catalina.connector.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
