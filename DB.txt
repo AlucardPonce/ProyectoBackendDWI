@@ -2,7 +2,8 @@ DROP DATABASE IF EXISTS idgs09;
 CREATE DATABASE idgs09;
 USE idgs09;
 
-CREATE TABLE Division (
+
+CREATE TABLE division (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     clave VARCHAR(45),
     nombre VARCHAR(45),
@@ -15,11 +16,11 @@ CREATE TABLE programa_educativo (
     programa_educativo VARCHAR(230),
     activo INT,
     id_division INT,
-    FOREIGN KEY (id_division) REFERENCES Division(id)
+    FOREIGN KEY (id_division) REFERENCES division(id)
 );
 
 -- Insertar divisiones
-INSERT INTO Division (clave, nombre, activo) VALUES 
+INSERT INTO division (clave, nombre, activo) VALUES 
 ('DIV01', 'Ingeniería en Software', TRUE),
 ('DIV02', 'Ingeniería en Mecatrónica', TRUE),
 ('DIV03', 'Ciencias Básicas', FALSE);
