@@ -16,6 +16,7 @@ public class ProgramaEducativo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pe")
     private int id_pe;
+    
     private String programaEducativo;
     private String clave;
     private boolean activo;
