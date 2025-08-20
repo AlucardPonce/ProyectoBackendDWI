@@ -1,6 +1,5 @@
 package mx.edu.uteq.idgs09.idgs09_01.services;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +13,10 @@ import mx.edu.uteq.idgs09.idgs09_01.model.entity.Division;
 
 @Service
 public class DivisionService {
+    
     @Autowired
     private DivisionRepo divisionRepo;
+    
     @Autowired
     private ProgramaEducativoRepo peRepo;
 
@@ -33,10 +34,14 @@ public class DivisionService {
     }
 
     @Transactional
-    public Division crear(Division d){
-        return divisionRepo.save(d);
+    public Division crear(Division d) {
+        try {
+            return divisionRepo.save(d);
+        } catch (Exception e) {
+            return null;
+        }
     }
-    
+
     @Transactional
     public Optional<Division> editar(int id, Division division) {
         Optional<Division> opt = divisionRepo.findById(id);
@@ -53,8 +58,27 @@ public class DivisionService {
     @Transactional
     public boolean borrar(int id) {
         Optional<Division> opt = divisionRepo.findById(id);
-        if(opt.isPresent()) {
-            divisionRepo.deleteById(id);
+        if (opt.isPresent()) {
+            Division division = opt.get();
+            
+            // Verificar si tiene programas educativos asociados
+            if (division.getProgramasEducativos() != null && !division.getProgramasEducativos().isEmpty()) {
+                return false; // No permitir borrar si tiene datos relacionados
+            }
+            
+            divisionRepo.deleteById(id); // Borrado físico directo
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional
+    public boolean borrarLogico(int id) {
+        Optional<Division> opt = divisionRepo.findById(id);
+        if (opt.isPresent()) {
+            Division d = opt.get();
+            d.setActivo(false); // Borrado lógico (cambiar status)
+            divisionRepo.save(d);
             return true;
         }
         return false;
